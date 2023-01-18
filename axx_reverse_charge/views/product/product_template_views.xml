@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_axx_product_category_form" model="ir.ui.view">
+        <field name="name">axx_product_category_form</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <field name="default_code" position="after">
+                <field name="axx_mat_color_id" create="0"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>
