@@ -70,7 +70,7 @@ class AxxSaleOrder(models.Model):
                 [('name', '=ilike', '0% Umsatzsteuer Lieferung von Mobilfunkgeräten u.a. (§13b)'),
                  ('type_tax_use', '=', 'sale'), ('company_id', '=', line.company_id.id)], limit=1)
             line.order_id.order_line.filtered('axx_is_rc_relevant').write({'tax_id': tax_id})
-        elif line.axx_is_rc_relevant and rc_relevant_total < 5000:
+        elif line.axx_is_rc_relevant and rc_relevant_total <= 5000:
             line.order_id.order_line.filtered('axx_is_rc_relevant')._compute_tax_id()
         else:
             line._compute_tax_id()
@@ -88,6 +88,13 @@ class AxxSaleOrder(models.Model):
             lines_to_delete and [order_line.unlink() for order_line in lines_to_delete]
         for order in self.filtered(lambda so: not so.axx_is_active_rc):
             order.order_line.filtered('axx_is_rc_relevant')._compute_tax_id()
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        orders = super(AxxSaleOrder, self).create(vals_list)
+        for so in orders:
+            so.reverse_charge_validation()
+        return orders
 
     def write(self, vals):
         res = super(AxxSaleOrder, self).write(vals)
@@ -112,14 +119,15 @@ class AxxSaleOrderLine(models.Model):
     @api.depends('product_id')
     def _compute_tax_id(self):
         for line in self:
-            if line.axx_is_rc_relevant and \
-                    sum(line.order_id.order_line.filtered('axx_is_rc_relevant').mapped('price_subtotal')) > 5000:
+            rc_relevant_total = sum(line.order_id.order_line.filtered(
+                    lambda line_id: line_id.axx_is_rc_relevant and
+                                    not line_id.axx_is_additional_service).mapped('price_subtotal'))
+            if line.axx_is_rc_relevant and rc_relevant_total > 5000:
                 tax_id = self.env['account.tax'].search(
                     [('name', '=ilike', '0% Umsatzsteuer Lieferung von Mobilfunkgeräten u.a. (§13b)'),
                      ('type_tax_use', '=', 'sale'), ('company_id', '=', line.company_id.id)], limit=1)
                 line.tax_id = tax_id
-            elif line.axx_is_rc_relevant and \
-                    sum(line.order_id.order_line.filtered('axx_is_rc_relevant').mapped('price_subtotal')) < 5000:
+            elif line.axx_is_rc_relevant and rc_relevant_total <= 5000:
                 super(AxxSaleOrderLine, self)._compute_tax_id()
             else:
                 super(AxxSaleOrderLine, self)._compute_tax_id()
@@ -127,14 +135,15 @@ class AxxSaleOrderLine(models.Model):
     @api.onchange('product_uom_qty', 'price_unit')
     def axx_onchange_subtotal(self):
         for line in self:
-            if line.axx_is_rc_relevant and \
-                    sum(line.order_id.order_line.filtered('axx_is_rc_relevant').mapped('price_subtotal')) > 5000:
+            rc_relevant_total = sum(line.order_id.order_line.filtered(
+                lambda line_id: line_id.axx_is_rc_relevant and
+                                not line_id.axx_is_additional_service).mapped('price_subtotal'))
+            if line.axx_is_rc_relevant and rc_relevant_total > 5000:
                 tax_id = self.env['account.tax'].search(
                     [('name', '=ilike', '0% Umsatzsteuer Lieferung von Mobilfunkgeräten u.a. (§13b)'),
                      ('type_tax_use', '=', 'sale'), ('company_id', '=', line.company_id.id)], limit=1)
                 line.tax_id = tax_id
-            elif line.axx_is_rc_relevant and \
-                    sum(line.order_id.order_line.filtered('axx_is_rc_relevant').mapped('price_subtotal')) < 5000:
+            elif line.axx_is_rc_relevant and rc_relevant_total <= 5000:
                 line._compute_tax_id()
             else:
                 line._compute_tax_id()
