@@ -23,7 +23,7 @@ class AxxPurchaseOrder(models.Model):
                     else:
                         additional_service_total = line.price_subtotal
                     if (self.amount_untaxed - additional_service_total) == rc_relevant_total:
-                        line.write({'axx_is_rc_relevant': True, 'axx_is_rc_calculation_done': True})
+                        line.write({'axx_is_rc_relevant': True})
                     else:
                         rc_relevant_perc = (rc_relevant_total / self.amount_untaxed)
                         original_price = line.price_unit

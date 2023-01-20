@@ -23,7 +23,7 @@ class AxxSaleOrder(models.Model):
                 additional_service_total = line.price_subtotal
             if not line.axx_is_rc_calculation_done:
                 if (self.amount_untaxed - additional_service_total) == rc_relevant_total:
-                    line.write({'axx_is_rc_relevant': True, 'axx_is_rc_calculation_done': True})
+                    line.write({'axx_is_rc_relevant': True})
                 else:
                     rc_relevant_perc = (rc_relevant_total / self.amount_untaxed)
                     original_price = line.price_unit
@@ -32,7 +32,8 @@ class AxxSaleOrder(models.Model):
                     new_line = line.copy(default={'order_id': line.order_id.id,
                                                   'state': line.order_id.state})
                     new_line.write({'price_unit': original_price * (1 - rc_relevant_perc),
-                                    'axx_is_rc_relevant': False})
+                                    'axx_is_rc_relevant': False, 'tax_id': False})
+                    new_line._compute_tax_id()
             else:
                 if non_rc_relevant_total:
                     additional_service_total = non_rc_relevant_total
