@@ -1,9 +1,14 @@
 {
     'name': 'Axx Reverse Charge',
     'summary': 'Axx Reverse Charge',
-    'description': 'To manage the tax based on the product (article) category',
+    'description': """
+            If Reverse charge valid articles total > 5000 then those articles (product) 
+            taxes should be removed based on order type.
+            Update tax based on the article category!
+            Income account and Expense account will also be updated for these articles if RC valid amount > 5000
+        """,
     'category': 'Accounting',
-    'version': '16.0.1.0.0',
+    'version': '16.0.1.0.1',
     'author': 'axxelia GmbH',
     'website': 'http://www.axxelia.com',
     'depends': [
@@ -11,13 +16,15 @@
         # Odoo
         # ---------------------
         'sale_management',
-        'purchase'
+        'purchase',
+        'stock',
         # ---------------------
         # OCA
         # ---------------------
         # ---------------------
         # EE
         # ---------------------
+        'account_accountant',
         # ---------------------
         # Thirdparty
         # ---------------------
