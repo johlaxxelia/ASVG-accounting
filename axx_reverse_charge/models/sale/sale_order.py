@@ -24,7 +24,7 @@ class AxxSaleOrder(models.Model):
                 if (self.amount_untaxed - additional_service_total) == rc_relevant_total:
                     line.write({'axx_is_rc_relevant': True})
                 else:
-                    rc_relevant_perc = (rc_relevant_total / self.amount_untaxed)
+                    rc_relevant_perc = (rc_relevant_total / (rc_relevant_total + non_rc_relevant_total))
                     original_price = line.price_unit
                     line.write({'price_unit': line.price_unit * rc_relevant_perc,
                                 'axx_is_rc_relevant': True, 'axx_is_rc_calculation_done': True})
@@ -46,7 +46,7 @@ class AxxSaleOrder(models.Model):
                         lambda rec: rec.product_id.id == line.product_id.id).mapped('price_unit'))
                     line.write({'price_unit': price, 'axx_is_rc_calculation_done': False})
                 elif non_rc_relevant_total:
-                    rc_relevant_perc = (rc_relevant_total / self.amount_untaxed)
+                    rc_relevant_perc = (rc_relevant_total / (rc_relevant_total + non_rc_relevant_total))
                     if not price:
                         price = sum(line.order_id.order_line.filtered(
                             lambda rec: rec.product_id.id == line.product_id.id).mapped('price_unit'))

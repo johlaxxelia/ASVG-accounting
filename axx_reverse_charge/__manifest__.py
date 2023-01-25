@@ -8,7 +8,7 @@
             Income account and Expense account will also be updated for these articles if RC valid amount > 5000
         """,
     'category': 'Accounting',
-    'version': '16.0.1.0.1',
+    'version': '16.0.1.0.2',
     'author': 'axxelia GmbH',
     'website': 'http://www.axxelia.com',
     'depends': [
