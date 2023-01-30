@@ -2,13 +2,15 @@
     'name': 'Axx Reverse Charge',
     'summary': 'Axx Reverse Charge',
     'description': """
-            If Reverse charge valid articles total > 5000 then those articles (product) 
+            If Reverse charge valid articles (product) total >= 5000 then those articles 
             taxes should be removed based on order type.
             Update tax based on the article category!
-            Income account and Expense account will also be updated for these articles if RC valid amount > 5000
+            There will be RC relevant income, expense and stock valuation accounts.
+            Income account, Expense account and Stock valuation account will also be updated for 
+            these articles if RC valid amount >= 5000.
         """,
     'category': 'Accounting',
-    'version': '16.0.1.0.2',
+    'version': '16.0.1.0.3',
     'author': 'axxelia GmbH',
     'website': 'http://www.axxelia.com',
     'depends': [
@@ -17,7 +19,7 @@
         # ---------------------
         'sale_management',
         'purchase',
-        'stock',
+        'stock_account',
         # ---------------------
         # OCA
         # ---------------------

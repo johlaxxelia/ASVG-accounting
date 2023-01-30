@@ -10,7 +10,7 @@ class AxxPurchaseOrder(models.Model):
         lines_to_delete = []
         price = 0
         if line.axx_is_additional_service:
-            if rc_relevant_total > 5000:
+            if rc_relevant_total >= 5000:
                 non_rc_relevant_total = sum(self.order_line.filtered(
                     lambda line_id: not line_id.axx_is_rc_relevant and
                                     not line_id.axx_is_additional_service).mapped('price_subtotal'))
@@ -54,7 +54,7 @@ class AxxPurchaseOrder(models.Model):
                             line.write({'price_unit': price * (1 - rc_relevant_perc)})
                     else:
                         lines_to_delete.append(line)
-            elif rc_relevant_total <= 5000 and line.axx_is_rc_calculation_done:
+            elif rc_relevant_total < 5000 and line.axx_is_rc_calculation_done:
                 if line.axx_is_rc_relevant:
                     price = sum(line.order_id.order_line.filtered(
                         lambda rec: rec.product_id.id == line.product_id.id).mapped('price_unit'))
@@ -65,12 +65,12 @@ class AxxPurchaseOrder(models.Model):
         return lines_to_delete
 
     def update_so_line_tax(self, line, rc_relevant_total):
-        if line.axx_is_rc_relevant and rc_relevant_total > 5000:
+        if line.axx_is_rc_relevant and rc_relevant_total >= 5000:
             tax_id = self.env['account.tax'].search(
                 [('name', '=ilike', 'Steuer gem. §13b 19%USt/19%VSt (Empfang von Mobilfunkgeräten u.a.)'),
                  ('type_tax_use', '=', 'purchase'), ('company_id', '=', line.company_id.id)], limit=1)
             line.order_id.order_line.filtered('axx_is_rc_relevant').write({'taxes_id': tax_id})
-        elif line.axx_is_rc_relevant and rc_relevant_total <= 5000:
+        elif line.axx_is_rc_relevant and rc_relevant_total < 5000:
             line.order_id.order_line.filtered('axx_is_rc_relevant')._compute_tax_id()
         else:
             line._compute_tax_id()
