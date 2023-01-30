@@ -8,3 +8,4 @@ class AxxProductCategory(models.Model):
     axx_is_additional_service = fields.Boolean(string='Is Additional Service', default=False)
     axx_rc_income_acc_id = fields.Many2one(comodel_name='account.account', string='RC Income Account')
     axx_rc_expense_acc_id = fields.Many2one(comodel_name='account.account', string='RC Expense Account')
+    axx_rc_stock_valuation_acc_id = fields.Many2one(comodel_name='account.account', string='RC Stock Valuation Account')

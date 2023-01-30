@@ -55,8 +55,22 @@ class AxxSaleOrderLine(models.Model):
         rc_relevant_total = sum(self.order_id.order_line.filtered(
             lambda line_id: line_id.axx_is_rc_relevant and
                             not line_id.axx_is_additional_service).mapped('price_subtotal'))
-        if rc_relevant_total > 5000 and self.axx_is_rc_relevant:
-            invoice_line['account_id'] = self.product_template_id.categ_id.axx_rc_income_acc_id and \
-                                         self.product_template_id.categ_id.axx_rc_income_acc_id.id or \
-                                         self.product_template_id.categ_id.property_account_income_categ_id.id
+        if rc_relevant_total >= 5000 and self.axx_is_rc_relevant:
+            expense_acc_id = self.product_template_id.categ_id.axx_rc_income_acc_id and \
+                             self.product_template_id.categ_id.axx_rc_income_acc_id.id or \
+                             self.product_template_id.property_account_income_id and \
+                             self.product_template_id.property_account_income_id.id or \
+                             self.product_template_id.categ_id.property_account_income_categ_id and \
+                             self.product_template_id.categ_id.property_account_income_categ_id.id
+            # stock_valuation_acc_id = self.categ_id.axx_rc_stock_valuation_acc_id or \
+            #                          self.categ_id.property_stock_valuation_account_id or False,
+            invoice_line.update({
+                'account_id': expense_acc_id,
+                # 'stock_valuation': stock_valuation_acc_id,
+            })
+
+
+            # invoice_line['account_id'] = self.product_template_id.categ_id.axx_rc_income_acc_id and \
+            #                              self.product_template_id.categ_id.axx_rc_income_acc_id.id or \
+            #                              self.product_template_id.categ_id.property_account_income_categ_id.id
         return invoice_line
